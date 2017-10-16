@@ -53,9 +53,6 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -381,18 +378,11 @@ public class Main extends Activity {
         showBreaks.setTextSize((float) 30);
         showBreaks.setTypeface(custom_font);
         showBreaks.setLayoutParams(new LinearLayout.LayoutParams(Light.Device.screenX(getApplicationContext()) / 10 * 8, ViewGroup.LayoutParams.WRAP_CONTENT));
-        final Switch pushNoti = new Switch(this);
-        pushNoti.setChecked(sp.getBoolean("push", true));
-        pushNoti.setText(R.string.push);
-        pushNoti.setTextSize((float) 30);
-        pushNoti.setTypeface(custom_font);
-        pushNoti.setLayoutParams(new LinearLayout.LayoutParams(Light.Device.screenX(getApplicationContext()) / 10 * 8, ViewGroup.LayoutParams.WRAP_CONTENT));
         spcl.setLayoutParams(new LinearLayout.LayoutParams(Light.Device.screenX(getApplicationContext()) / 10 * 9, (int) (Light.Device.screenY(getApplicationContext()) * 0.7)));
         part3.addView(spclSet);
         spcl.addView(showTimes);
         spcl.addView(showBreaks);
         spcl.addView(textCo);
-        spcl.addView(pushNoti);
         part3.addView(spcl);
         part3.addView(done);
         done.setOnClickListener(new View.OnClickListener() {
@@ -401,31 +391,9 @@ public class Main extends Activity {
                 sp.edit().putBoolean("show_time", showTimes.isChecked()).commit();
                 sp.edit().putBoolean("fontWhite", textCo.isChecked()).commit();
                 sp.edit().putBoolean("breaks", textCo.isChecked()).commit();
-                sp.edit().putBoolean("push", pushNoti.isChecked()).commit();
                 sp.edit().putInt("last_recorded_version_code", Light.Device.getVersionCode(getApplicationContext(), getPackageName())).commit();
                 sp.edit().putBoolean("first", false).commit();
-                if (!renew) {
-                    new Light.Net.Pinger(2000, new Light.Net.Pinger.OnEnd() {
-                        @Override
-                        public void onPing(String s, boolean b) {
-                            if (b) {
-                                ArrayList<Light.Net.PHP.Post.PHPParameter> parms = new ArrayList<>();
-                                parms.add(new Light.Net.PHP.Post.PHPParameter("install", "true"));
-                                new Light.Net.PHP.Post("http://handasaim.thepuzik.com/new.php", parms, new Light.Net.PHP.Post.OnPost() {
-                                    @Override
-                                    public void onPost(String s) {
-                                        //                                        Log.i("COUNT", s);
-                                        view(classes);
-                                    }
-                                }).execute();
-                            } else {
-                                view(classes);
-                            }
-                        }
-                    }).execute("http://handasaim.thepuzik.com");
-                } else {
-                    view(classes);
-                }
+                view(classes);
                 //                view(classes);
             }
         });
@@ -497,7 +465,6 @@ public class Main extends Activity {
         final LinearLayout navbarAll = new LinearLayout(this);
         final ImageView nutIcon = new ImageView(this);
         final ImageView newsIcon = new ImageView(this);
-        final ImageView pushIcon = new ImageView(this);
         final int screenY = Light.Device.screenY(this);
         final int nutSize = (screenY / 8) - screenY / 30;
         final int newsSize = (screenY / 9) - screenY / 30;
@@ -516,9 +483,6 @@ public class Main extends Activity {
         navbarAll.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         newsIcon.setLayoutParams(newsParms);
         newsIcon.setImageDrawable(getDrawable(R.drawable.ic_news));
-        pushIcon.setLayoutParams(newsParms);
-        final ObjectAnimator rotating = ObjectAnimator.ofFloat(pushIcon, View.TRANSLATION_X, Light.Animations.VIBRATE_SMALL);
-        pushIcon.setImageDrawable(getDrawable(R.drawable.ic_info));
         nutIcon.setLayoutParams(nutParms);
         nutIcon.setImageDrawable(getDrawable(R.drawable.ic_icon));
         nutIcon.setOnClickListener(new View.OnClickListener() {
@@ -526,7 +490,7 @@ public class Main extends Activity {
             public void onClick(View view) {
                 AlertDialog.Builder ab = new AlertDialog.Builder(Main.this);
                 ab.setTitle(R.string.app_name);
-                ab.setMessage("This App Was Made By NadavTasher\nVersion: " + Light.Device.getVersionName(getApplicationContext(), getPackageName()) + "\nBuild: " + Light.Device.getVersionCode(getApplicationContext(), getPackageName()));
+                ab.setMessage("This Is The Teacher Edition Of The Handasaim+ App.\nThis App Was Made By NadavTasher\nVersion: " + Light.Device.getVersionName(getApplicationContext(), getPackageName()) + "\nBuild: " + Light.Device.getVersionCode(getApplicationContext(), getPackageName()));
                 ab.setCancelable(true);
                 ab.setPositiveButton("Close", null);
                 ab.show();
@@ -541,7 +505,6 @@ public class Main extends Activity {
         });
         navbarAll.addView(nutIcon);
         navbarAll.addView(newsIcon);
-        navbarAll.addView(pushIcon);
         navbarAll.setPadding(10, 10, 10, 10);
         navParms.gravity = Gravity.START;
         navbarAll.setLayoutParams(navParms);
@@ -621,18 +584,6 @@ public class Main extends Activity {
         tsw.setGravity(Gravity.CENTER);
         tsw.setOrientation(LinearLayout.HORIZONTAL);
         navSliderview.addView(tsw);
-        //
-        final LinearLayout pushSwitch = new LinearLayout(this);
-        pushSwitch.setBackground(getDrawable(R.drawable.back));
-        pushSwitch.setLayoutParams(new LinearLayout.LayoutParams(Light.Device.screenY(getApplicationContext()) / 12, Light.Device.screenY(getApplicationContext()) / 12));
-        final ImageView pushSwitch_ic = new ImageView(getApplicationContext());
-        pushSwitch_ic.setLayoutParams(new LinearLayout.LayoutParams(Light.Device.screenY(getApplicationContext()) / 20, Light.Device.screenY(getApplicationContext()) / 20));
-        pushSwitch_ic.setImageDrawable(getDrawable(R.drawable.ic_info_sett));
-        pushSwitch.addView(pushSwitch_ic);
-        pushSwitch.setPadding(20, 20, 20, 20);
-        pushSwitch.setGravity(Gravity.CENTER);
-        pushSwitch.setOrientation(LinearLayout.HORIZONTAL);
-        navSliderview.addView(pushSwitch);
         //
         LinearLayout fontS = new LinearLayout(this);
         fontS.setOrientation(LinearLayout.HORIZONTAL);
@@ -903,11 +854,6 @@ public class Main extends Activity {
         tsw_ic.setOnClickListener(themeONC);
         tsw_ic.setOnLongClickListener(themelong);
         tsw.setOnLongClickListener(themelong);
-        if (!sp.getBoolean("push", false)) {
-            pushSwitch.setBackground(getDrawable(R.drawable.back));
-        } else {
-            pushSwitch.setBackground(getDrawable(R.drawable.back_2));
-        }
         plus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
