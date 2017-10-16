@@ -4,7 +4,7 @@
     <string name="set">Setup</string>
     <string name="wlc">Welcome To Handasaim+ For Teachers</string>
     <string name="nxt">Next</string>
-    <string name="scla">Select Class</string>
+    <string name="scla">Select Teacher</string>
     <string name="dn">Done</string>
     <string name="spclstt">Special Settings</string>
     <string name="sct">Show Class Times</string>
@@ -14,6 +14,5 @@
     <string name="showbrk">Show Break Times</string>
     <string name="rnew">Renew Special Settings:</string>
     <string name="cls">Close</string>
-    <string name="push">Push Notifications</string>
     <string name="sv">Save</string>
 </resources>

@@ -77,7 +77,7 @@ public class Main extends Activity {
     private int color = Color.parseColor("#1b5c96");
     private int secolor = color + 0x333333;
     private String day;
-    private Class currentClass;
+    private Teacher currentClass;
     private int textColor = Color.WHITE;
     private int countheme = 0;
     private Theme[] themes = new Theme[]{new Theme("#000000"), new Theme("#562627"), new Theme("#773272"), new Theme("#9b8c36"), new Theme("#425166"), new Theme("#112233"), new Theme("#325947"), new Theme("#893768"), new Theme("#746764"), new Theme("#553311"), new Theme(color)};
@@ -225,7 +225,7 @@ public class Main extends Activity {
         setContentView(ll);
     }
 
-    private void welcome(final ArrayList<Class> classes, final boolean renew) {
+    private void welcome(final ArrayList<Teacher> classes, final boolean renew) {
         final SharedPreferences sp = getSharedPreferences("app", Context.MODE_PRIVATE);
         LinearLayout part1 = new LinearLayout(this);
         final LinearLayout part2 = new LinearLayout(this);
@@ -317,7 +317,7 @@ public class Main extends Activity {
         clascroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (Light.Device.screenY(getApplicationContext()) * 0.7)));
         for (int c = 0; c < classes.size(); c++) {
             RadioButton rb = new RadioButton(this);
-            rb.setText(classes.get(c).name);
+            rb.setText(classes.get(c).mainName);
             rb.setTextSize((float) 30);
             rb.setTypeface(custom_font);
             rb.setGravity(Gravity.CENTER);
@@ -329,7 +329,7 @@ public class Main extends Activity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sp.edit().putString("favorite_class", classes.get(classs.getCheckedRadioButtonId()).name).commit();
+                sp.edit().putString("favorite_teacher", classes.get(classs.getCheckedRadioButtonId()).mainName).commit();
                 setContentView(part3);
             }
         });
@@ -456,7 +456,7 @@ public class Main extends Activity {
         }
     }
 
-    private void view(final ArrayList<Class> classes) {
+    private void view(final ArrayList<Teacher> classes) {
         final SharedPreferences sp = getSharedPreferences("app", Context.MODE_PRIVATE);
         getWindow().setStatusBarColor(secolor);
         taskDesc();
@@ -619,7 +619,7 @@ public class Main extends Activity {
         sr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                share(currentClass.name + "\n" + hourSystemForClassString(currentClass, sp.getBoolean("show_time", true)));
+                share(currentClass.mainName + "\n" + hourSystemForTeacherString(currentClass, sp.getBoolean("show_time", true)));
             }
         });
         share.setLayoutParams(new LinearLayout.LayoutParams(Light.Device.screenY(getApplicationContext()) / 12, Light.Device.screenY(getApplicationContext()) / 12));
@@ -627,10 +627,10 @@ public class Main extends Activity {
         navSliderview.addView(fontS);
         //
         int selectedClass = 0;
-        if (sp.getString("favorite_class", null) != null) {
+        if (sp.getString("favorite_teacher", null) != null) {
             if (classes != null) {
                 for (int fc = 0; fc < classes.size(); fc++) {
-                    if (sp.getString("favorite_class", "").equals(classes.get(fc).name)) {
+                    if (sp.getString("favorite_teacher", "").equals(classes.get(fc).mainName)) {
                         selectedClass = fc;
                         break;
                     }
@@ -975,7 +975,7 @@ public class Main extends Activity {
         startActivity(Intent.createChooser(s, "Share With"));
     }
 
-    private void showHS(final Class c, final LinearLayout hsplace, final ArrayList<Class> classes, final boolean showTime, final int fontSize, final boolean breakTimes, final boolean showOrgCheckBox) {
+    private void showHS(final Teacher c, final LinearLayout hsplace, final ArrayList<Teacher> classes, final boolean showTime, final int fontSize, final boolean breakTimes, final boolean showOrgCheckBox) {
         currentClass = c;
         hsplace.removeAllViews();
         final Typeface custom_font = Typeface.createFromAsset(getAssets(), "gisha.ttf");
@@ -984,7 +984,7 @@ public class Main extends Activity {
         //        className.setBackgroundColor(Color.TRANSPARENT);
         className.setGravity(Gravity.CENTER);
         className.setBackground(getDrawable(R.drawable.back));
-        className.setText(c.name + " (" + day + ")");
+        className.setText(c.mainName + " (" + day + ")");
         className.setTextColor(textColor);
         className.setTypeface(custom_font);
         className.setOnClickListener(new View.OnClickListener() {
@@ -1003,7 +1003,7 @@ public class Main extends Activity {
                         Button cls = new Button(getApplicationContext());
                         cls.setTextSize((float) fontSize);
                         cls.setGravity(Gravity.CENTER);
-                        cls.setText(classes.get(cs).name);
+                        cls.setText(classes.get(cs).mainName);
                         cls.setTextColor(textColor);
                         cls.setBackgroundColor(Color.TRANSPARENT);
                         cls.setTypeface(custom_font);
@@ -1014,7 +1014,7 @@ public class Main extends Activity {
                             @Override
                             public void onClick(View view) {
                                 final SharedPreferences sp = getSharedPreferences("app", Context.MODE_PRIVATE);
-                                sp.edit().putString("favorite_class", classes.get(finalCs).name).commit();
+                                sp.edit().putString("favorite_teacher", classes.get(finalCs).mainName).commit();
                                 showHS(classes.get(finalCs), hsplace, classes, showTime, fontSize, breakTimes, showOrgCheckBox);
                                 dialog.dismiss();
                             }
@@ -1025,32 +1025,123 @@ public class Main extends Activity {
             }
         });
         hsplace.addView(className);
-        hsplace.addView(hourSystemForClass(c, showTime, fontSize, breakTimes, showOrgCheckBox));
+        hsplace.addView(hourSystemForTeacher(c, showTime, fontSize, breakTimes, showOrgCheckBox));
     }
 
-    private LinearLayout hourSystemForClass(final Class fclass, boolean showTime, int fontSize, boolean breakTimes, boolean showOrgC) {
+    private LinearLayout hourSystemForTeacher(final Teacher fclass, boolean showTime, int fontSize, boolean breakTimes, boolean showOrgC) {
         LinearLayout all = new LinearLayout(this);
         all.setGravity(Gravity.START | Gravity.CENTER_HORIZONTAL);
         all.setOrientation(LinearLayout.VERTICAL);
         all.setPadding(10, 10, 10, 10);
         final Typeface custom_font = Typeface.createFromAsset(getAssets(), "gisha.ttf");
-        for (int s = 0; s < fclass.classes.size(); s++) {
-            if (getBreak(fclass.classes.get(s).hour - 1) != -1 && breakTimes) {
-                final Button breakt = new Button(this);
-                breakt.setText("הפסקה, " + getBreak(fclass.classes.get(s).hour - 1) + " דקות");
-                breakt.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-                breakt.setTextSize((float) fontSize - 2);
-                breakt.setTextColor(textColor);
-                breakt.setBackground(getDrawable(R.drawable.button));
-                breakt.setPadding(20, 20, 20, 20);
-                breakt.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Light.Device.screenY(getApplicationContext()) / 10));
-                breakt.setTypeface(custom_font);
-                breakt.setAllCaps(false);
-                if (fclass.classes.get(s).name != null && !fclass.classes.get(s).name.equals("")) {
-                    all.addView(breakt);
+        for (int h = 0; h <=12; h++) {
+            ArrayList<String> classesofhour=new ArrayList<>();
+            for (int s = 0; s < fclass.teaching.size(); s++) {
+                if (getBreak(fclass.teaching.get(s).hour - 1) != -1 && breakTimes) {
+                    final Button breakt = new Button(this);
+                    breakt.setText("הפסקה, " + getBreak(fclass.teaching.get(s).hour - 1) + " דקות");
+                    breakt.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+                    breakt.setTextSize((float) fontSize - 2);
+                    breakt.setTextColor(textColor);
+                    breakt.setBackground(getDrawable(R.drawable.button));
+                    breakt.setPadding(20, 20, 20, 20);
+                    breakt.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Light.Device.screenY(getApplicationContext()) / 10));
+                    breakt.setTypeface(custom_font);
+                    breakt.setAllCaps(false);
+                    if (fclass.teaching.get(s).lessonName != null && !fclass.teaching.get(s).lessonName.equals("")) {
+                        all.addView(breakt);
+                    }
+                    final int finalS1 = s;
+                    breakt.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            final Dialog dialog = new Dialog(Main.this);
+                            dialog.setCancelable(true);
+                            LinearLayout di = new LinearLayout(getApplicationContext());
+                            TextView subjName = new TextView(getApplicationContext());
+                            TextView hours = new TextView(getApplicationContext());
+                            TextView fullInfo = new TextView(getApplicationContext());
+                            subjName.setText(R.string.brkk);
+                            //fclass.classes.get(s)
+                            hours.setText(getRealEndTimeForHourNumber(fclass.teaching.get(finalS1).hour - 1) + "-" + getRealTimeForHourNumber(fclass.teaching.get(finalS1).hour));
+                            String fulltext = getBreak(fclass.teaching.get(finalS1).hour - 1) + " Minutes";
+                            fullInfo.setText(fulltext);
+                            di.setGravity(Gravity.CENTER);
+                            di.setOrientation(LinearLayout.VERTICAL);
+                            di.addView(subjName);
+                            di.addView(hours);
+                            di.addView(fullInfo);
+                            di.setBackgroundColor(color);
+                            subjName.setTextColor(textColor);
+                            hours.setTextColor(textColor);
+                            fullInfo.setTextColor(textColor);
+                            subjName.setTextSize((float) 30);
+                            hours.setTextSize((float) 30);
+                            fullInfo.setTextSize((float) 30);
+                            subjName.setGravity(Gravity.CENTER);
+                            hours.setGravity(Gravity.CENTER);
+                            fullInfo.setGravity(Gravity.CENTER);
+                            subjName.setTypeface(custom_font, Typeface.BOLD);
+                            hours.setTypeface(custom_font);
+                            fullInfo.setTypeface(custom_font);
+                            Button close = new Button(getApplicationContext());
+                            close.setText(R.string.close);
+                            close.setTextColor(textColor);
+                            close.setTypeface(custom_font);
+                            close.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            close.setAllCaps(false);
+                            close.setBackground(getDrawable(R.drawable.button));
+                            close.setLayoutParams(new LinearLayout.LayoutParams((int) (Light.Device.screenX(getApplicationContext()) * 0.6) + (Light.Device.screenX(getApplicationContext()) / 20), (Light.Device.screenY(getApplicationContext()) / 10)));
+                            close.setTextSize((float) 25);
+                            di.addView(close);
+                            dialog.setContentView(di);
+                            dialog.show();
+                        }
+                    });
                 }
-                final int finalS1 = s;
-                breakt.setOnClickListener(new View.OnClickListener() {
+                final LinearLayout fsubj = new LinearLayout(getApplicationContext());
+                fsubj.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+                fsubj.setGravity(Gravity.CENTER);
+                //            fsubj.setGravity(Gravity.START|Gravity.CENTER_VERTICAL);
+                fsubj.setOrientation(LinearLayout.HORIZONTAL);
+                Button subj = new Button(this);
+                if (showOrgC) {
+                    fsubj.setPadding(0, 0, 20, 0);
+                    CheckBox che = new CheckBox(getApplicationContext());
+                    che.setText(null);
+                    che.setButtonDrawable(getDrawable(R.drawable.checkbox_b));
+                    //                che.setButtonTintList(new ColorStateList());
+                    fsubj.addView(che);
+                    fsubj.setBackground(getDrawable(R.drawable.backasbutton));
+                    subj.setBackground(getDrawable(R.drawable.button_alpha));
+                } else {
+                    subj.setBackground(getDrawable(R.drawable.button));
+
+                }
+                String before;
+                if (showTime) {
+                    before = "(" + getRealTimeForHourNumber(fclass.teaching.get(s).hour) + ") " + fclass.teaching.get(s).hour + ". ";
+                } else {
+                    before = fclass.teaching.get(s).hour + ". ";
+                }
+                String total = before + fclass.teaching.get(s).className;
+                String main = "\u200F" + total;
+                subj.setText(main);
+                subj.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+                subj.setTextSize((float) fontSize - 2);
+                subj.setTextColor(textColor);
+                subj.setPadding(20, 20, 20, 20);
+                subj.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Light.Device.screenY(getApplicationContext()) / 10));
+                subj.setTypeface(custom_font);
+                subj.setSingleLine(true);
+                subj.setEllipsize(TextUtils.TruncateAt.END);
+                final int finalS = s;
+                subj.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         final Dialog dialog = new Dialog(Main.this);
@@ -1059,11 +1150,10 @@ public class Main extends Activity {
                         TextView subjName = new TextView(getApplicationContext());
                         TextView hours = new TextView(getApplicationContext());
                         TextView fullInfo = new TextView(getApplicationContext());
-                        subjName.setText(R.string.brkk);
+                        subjName.setText(fclass.teaching.get(finalS).className);
                         //fclass.classes.get(s)
-                        hours.setText(getRealEndTimeForHourNumber(fclass.classes.get(finalS1).hour - 1) + "-" + getRealTimeForHourNumber(fclass.classes.get(finalS1).hour));
-                        String fulltext = getBreak(fclass.classes.get(finalS1).hour - 1) + " Minutes";
-                        fullInfo.setText(fulltext);
+                        hours.setText(getRealTimeForHourNumber(fclass.teaching.get(finalS).hour) + "-" + getRealEndTimeForHourNumber(fclass.teaching.get(finalS).hour));
+                        fullInfo.setText(fclass.teaching.get(finalS).className);
                         di.setGravity(Gravity.CENTER);
                         di.setOrientation(LinearLayout.VERTICAL);
                         di.addView(subjName);
@@ -1085,6 +1175,7 @@ public class Main extends Activity {
                         Button close = new Button(getApplicationContext());
                         close.setText(R.string.close);
                         close.setTextColor(textColor);
+                        close.setTextSize((float) 25);
                         close.setTypeface(custom_font);
                         close.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -1095,126 +1186,39 @@ public class Main extends Activity {
                         close.setAllCaps(false);
                         close.setBackground(getDrawable(R.drawable.button));
                         close.setLayoutParams(new LinearLayout.LayoutParams((int) (Light.Device.screenX(getApplicationContext()) * 0.6) + (Light.Device.screenX(getApplicationContext()) / 20), (Light.Device.screenY(getApplicationContext()) / 10)));
-                        close.setTextSize((float) 25);
                         di.addView(close);
                         dialog.setContentView(di);
                         dialog.show();
                     }
                 });
-            }
-            final LinearLayout fsubj = new LinearLayout(getApplicationContext());
-            fsubj.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-            fsubj.setGravity(Gravity.CENTER);
-            //            fsubj.setGravity(Gravity.START|Gravity.CENTER_VERTICAL);
-            fsubj.setOrientation(LinearLayout.HORIZONTAL);
-            Button subj = new Button(this);
-            if (showOrgC) {
-                fsubj.setPadding(0, 0, 20, 0);
-                CheckBox che = new CheckBox(getApplicationContext());
-                che.setText(null);
-                che.setButtonDrawable(getDrawable(R.drawable.checkbox_b));
-                //                che.setButtonTintList(new ColorStateList());
-                fsubj.addView(che);
-                fsubj.setBackground(getDrawable(R.drawable.backasbutton));
-                subj.setBackground(getDrawable(R.drawable.button_alpha));
-            } else {
-                subj.setBackground(getDrawable(R.drawable.button));
-
-            }
-            String before;
-            if (showTime) {
-                before = "(" + getRealTimeForHourNumber(fclass.classes.get(s).hour) + ") " + fclass.classes.get(s).hour + ". ";
-            } else {
-                before = fclass.classes.get(s).hour + ". ";
-            }
-            String total = before + fclass.classes.get(s).name;
-            String main = "\u200F" + total;
-            subj.setText(main);
-            subj.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-            subj.setTextSize((float) fontSize - 2);
-            subj.setTextColor(textColor);
-            subj.setPadding(20, 20, 20, 20);
-            subj.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Light.Device.screenY(getApplicationContext()) / 10));
-            subj.setTypeface(custom_font);
-            subj.setSingleLine(true);
-            subj.setEllipsize(TextUtils.TruncateAt.END);
-            final int finalS = s;
-            subj.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final Dialog dialog = new Dialog(Main.this);
-                    dialog.setCancelable(true);
-                    LinearLayout di = new LinearLayout(getApplicationContext());
-                    TextView subjName = new TextView(getApplicationContext());
-                    TextView hours = new TextView(getApplicationContext());
-                    TextView fullInfo = new TextView(getApplicationContext());
-                    subjName.setText(fclass.classes.get(finalS).name);
-                    //fclass.classes.get(s)
-                    hours.setText(getRealTimeForHourNumber(fclass.classes.get(finalS).hour) + "-" + getRealEndTimeForHourNumber(fclass.classes.get(finalS).hour));
-                    fullInfo.setText(fclass.classes.get(finalS).fullName);
-                    di.setGravity(Gravity.CENTER);
-                    di.setOrientation(LinearLayout.VERTICAL);
-                    di.addView(subjName);
-                    di.addView(hours);
-                    di.addView(fullInfo);
-                    di.setBackgroundColor(color);
-                    subjName.setTextColor(textColor);
-                    hours.setTextColor(textColor);
-                    fullInfo.setTextColor(textColor);
-                    subjName.setTextSize((float) 30);
-                    hours.setTextSize((float) 30);
-                    fullInfo.setTextSize((float) 30);
-                    subjName.setGravity(Gravity.CENTER);
-                    hours.setGravity(Gravity.CENTER);
-                    fullInfo.setGravity(Gravity.CENTER);
-                    subjName.setTypeface(custom_font, Typeface.BOLD);
-                    hours.setTypeface(custom_font);
-                    fullInfo.setTypeface(custom_font);
-                    Button close = new Button(getApplicationContext());
-                    close.setText(R.string.close);
-                    close.setTextColor(textColor);
-                    close.setTextSize((float) 25);
-                    close.setTypeface(custom_font);
-                    close.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.dismiss();
-                        }
-                    });
-                    close.setAllCaps(false);
-                    close.setBackground(getDrawable(R.drawable.button));
-                    close.setLayoutParams(new LinearLayout.LayoutParams((int) (Light.Device.screenX(getApplicationContext()) * 0.6) + (Light.Device.screenX(getApplicationContext()) / 20), (Light.Device.screenY(getApplicationContext()) / 10)));
-                    di.addView(close);
-                    dialog.setContentView(di);
-                    dialog.show();
+                subj.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        Toast.makeText(getApplicationContext(), getRealTimeForHourNumber(fclass.teaching.get(finalS).hour) + "-" + getRealEndTimeForHourNumber(fclass.teaching.get(finalS).hour), Toast.LENGTH_LONG).show();
+                        return true;
+                    }
+                });
+                if (fclass.teaching.get(s).hour==h) {
+                    classesofhour.add(fclass.teaching.get(s).className);
+                    fsubj.addView(subj);
+                    all.addView(fsubj);
                 }
-            });
-            subj.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    Toast.makeText(getApplicationContext(), getRealTimeForHourNumber(fclass.classes.get(finalS).hour) + "-" + getRealEndTimeForHourNumber(fclass.classes.get(finalS).hour), Toast.LENGTH_LONG).show();
-                    return true;
-                }
-            });
-            if (fclass.classes.get(s).name != null && !fclass.classes.get(s).name.equals("")) {
-                fsubj.addView(subj);
-                all.addView(fsubj);
             }
         }
         return all;
     }
 
-    private String hourSystemForClassString(Class fclass, boolean showTime) {
+    private String hourSystemForTeacherString(Teacher fclass, boolean showTime) {
         String allsubj = "";
-        for (int s = 0; s < fclass.classes.size(); s++) {
+        for (int s = 0; s < fclass.teaching.size(); s++) {
             String before;
             if (showTime) {
-                before = "(" + getRealTimeForHourNumber(fclass.classes.get(s).hour) + ") " + fclass.classes.get(s).hour + ". ";
+                before = "(" + getRealTimeForHourNumber(fclass.teaching.get(s).hour) + ") " + fclass.teaching.get(s).hour + ". ";
             } else {
-                before = fclass.classes.get(s).hour + ". ";
+                before = fclass.teaching.get(s).hour + ". ";
             }
-            String total = before + fclass.classes.get(s).name;
-            if (fclass.classes.get(s).name != null && !fclass.classes.get(s).name.equals("")) {
+            String total = before + fclass.teaching.get(s).className;
+            if (fclass.teaching.get(s).lessonName != null && !fclass.teaching.get(s).lessonName.equals("")) {
                 allsubj += total + "\n";
             }
         }
@@ -1313,7 +1317,8 @@ public class Main extends Activity {
                         @Override
                         public void onFinish(File file, boolean b) {
                             if (b) {
-                                ArrayList<Class> classes = readExcelFile(file);
+                                Log.i("H+ FT","Download Finished");
+                                ArrayList<Teacher> classes = readExcelFile(file);
                                 day = readExcelDay(file);
                                 if (classes != null) {
                                     //                                    for (int cl = 0; cl < classes.size(); cl++) {
@@ -1359,7 +1364,7 @@ public class Main extends Activity {
         }).execute();
     }
 
-    private ArrayList<Class> readExcelFile(File f) {
+    private ArrayList<Teacher> readExcelFile(File f) {
         try {
             ArrayList<Class> classes = new ArrayList<>();
             POIFSFileSystem myFileSystem = new POIFSFileSystem(new FileInputStream(f));
@@ -1375,8 +1380,9 @@ public class Main extends Activity {
                 }
                 classes.add(new Class(mySheet.getRow(1).getCell(c).getStringCellValue(), subs));
             }
-            return classes;
+            return getTeacherSchudleForClasses(classes);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -1391,7 +1397,41 @@ public class Main extends Activity {
             return null;
         }
     }
-
+    private ArrayList<Teacher> getTeacherSchudleForClasses(ArrayList<Class> classes){
+        ArrayList<Teacher> allTeachers=new ArrayList<>();
+        for(int classof=0;classof<classes.size();classof++) {
+            Class c = classes.get(classof);
+            ArrayList<Subject> subjs = c.classes;
+            for (int subj = 0; subj < subjs.size(); subj++) {
+                Subject subject=subjs.get(subj);
+                Log.i("Subj",subject.fullName.split("\\r?\\n")[0]);
+                String teachOrTcrs=subject.fullName.substring(subject.fullName.indexOf("\n") + 1).trim().split("\\r?\\n")[0];
+                ArrayList<String> teacherNames= Light.Stringer.cutOnEvery(teachOrTcrs,",");
+                for(int tcrName=0;tcrName<teacherNames.size();tcrName++) {
+                    String teacherName = teacherNames.get(tcrName);
+                    Teacher foundTeacher=null;
+                    for (int teacher = 0; teacher < allTeachers.size(); teacher++) {
+                        if(allTeachers.get(teacher).mainName.equals(teacherName)||allTeachers.get(teacher).mainName.contains(teacherName)){
+                            foundTeacher=allTeachers.get(teacher);
+                            break;
+                        }
+                    }
+                    if(foundTeacher!=null){
+                        if(subject.name!=null&&!subject.name.equals(""))
+                        foundTeacher.teaching.add(new TeacherClass(c.name,subject.name,subject.hour));
+                    }else{
+                        foundTeacher=new Teacher();
+                        foundTeacher.mainName=teacherName;
+                        foundTeacher.teaching=new ArrayList<>();
+                        if(subject.name!=null&&!subject.name.equals(""))
+                            foundTeacher.teaching.add(new TeacherClass(c.name,subject.name,subject.hour));
+                        allTeachers.add(foundTeacher);
+                    }
+                }
+            }
+        }
+        return allTeachers;
+    }
     static class Link {
         String url, name;
     }
@@ -1423,6 +1463,22 @@ public class Main extends Activity {
             this.hour = hour;
             this.name = name;
             this.fullName = fullName;
+        }
+    }
+    private class Teacher{
+        ArrayList<TeacherClass> teaching;
+        String mainName;
+        String teachingAt(int hour){
+            return null;
+        }
+    }
+    private class TeacherClass{
+        String className,lessonName;
+        int hour;
+        TeacherClass(String className,String lessonName,int hour){
+            this.hour=hour;
+            this.className=className;
+            this.lessonName=lessonName;
         }
     }
 }
