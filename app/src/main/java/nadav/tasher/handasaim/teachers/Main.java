@@ -1322,15 +1322,26 @@ public class Main extends Activity {
                         }
                     }
                     if (foundTeacher != null) {
-                        if (subject.name != null && !subject.name.equals(""))
-                            foundTeacher.teaching.add(new TeacherClass(c.name, subject.name, subject.hour));
+                        if (subject.name != null && !subject.name.equals("")) {
+                            if(foundTeacher.mainSubject!=null) {
+                                if (foundTeacher.mainSubject.contains(subject.name) || subject.name.contains(foundTeacher.mainSubject))
+                                    foundTeacher.teaching.add(new TeacherClass(c.name, subject.name, subject.hour));
+                            }else{
+                                foundTeacher.teaching.add(new TeacherClass(c.name, subject.name, subject.hour));
+                                foundTeacher.mainSubject=subject.name;
+                            }
+                        }
                     } else {
                         foundTeacher = new Teacher();
                         foundTeacher.mainName = teacherName;
                         foundTeacher.teaching = new ArrayList<>();
-                        if (subject.name != null && !subject.name.equals(""))
+                        if (subject.name != null && !subject.name.equals("")) {
                             foundTeacher.teaching.add(new TeacherClass(c.name, subject.name, subject.hour));
-                        allTeachers.add(foundTeacher);
+                            foundTeacher.mainSubject = subject.name;
+                        }
+                        if(!foundTeacher.mainName.equals("")) {
+                            allTeachers.add(foundTeacher);
+                        }
                     }
                 }
             }
@@ -1373,7 +1384,7 @@ public class Main extends Activity {
     }
     private class Teacher {
         ArrayList<TeacherClass> teaching;
-        String mainName;
+        String mainName,mainSubject;
     }
     private class TeacherClass {
         String className, lessonName;
